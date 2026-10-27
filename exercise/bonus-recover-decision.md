@@ -26,16 +26,16 @@ agent จะเขียน ADR ที่กู้คืนมา พร้อ�
 
 | # | ข้อกล่าวอ้าง (ย่อ) | AI ระบุว่า | นิสิตระบุว่า | เหตุผล (path ของไฟล์หรือการให้เหตุผล) |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
+| C1 | หลาย service definitions อยู่ใน `demo.proto` | Evidenced | Evidenced | `system/online-boutique/protos/demo.proto` (`service CartService`, `service CheckoutService`) |
+| C2 | `frontend` รับ HTTP และสร้าง gRPC clients เจ็ดบริการ | Evidenced | Evidenced | `system/online-boutique/src/frontend/main.go` (`r.HandleFunc`, `mustConnGRPC`) |
+| C5 | ลำดับ checkout ต้องใช้ผลก่อนตอบ | Inferred | Inferred | เห็นลำดับ RPC ใน `system/online-boutique/src/checkoutservice/main.go` (`PlaceOrder`) แต่คำว่า “ต้อง” เป็นเหตุผลที่อนุมาน |
+| C6 | การรักษาชนิดข้อมูลร่วมเป็นแรงจูงใจ | Inferred | Inferred | `demo.proto` มีชนิดข้อมูลร่วม แต่ไม่บอกเหตุผลของผู้ตัดสินใจ |
+| C15 | latency และต้นทุนแก้สัญญาอาจเพิ่ม | Inferred | Inferred | เป็นผลกระทบที่เป็นไปได้จาก RPC และไฟล์สัญญาร่วม; ไม่มีผลวัดจริง |
 
-**นับ:** จากข้อกล่าวอ้างทั้งหมด agent ระบุว่า *Evidenced* กี่ข้อ ___ ตามที่นิสิตตรวจ ___
+**นับ:** จากข้อกล่าวอ้างทั้งหมด agent ระบุว่า *Evidenced* กี่ข้อ 4 ตามการตรวจหลักฐานในร่างนี้ 4
 
 ## สะท้อนคิด
 
-1. agent เคยระบุการเดาว่าเป็น *Evidenced* หรือไม่ ยกตัวอย่าง หรืออธิบายว่าตรวจสอบอย่างไรว่าไม่มี
-2. หากนักพัฒนาใหม่อ่านเฉพาะ ADR ที่กู้คืนมานี้ เขาอาจเข้าใจผิดในเรื่องใด
-3. AI กู้คืนอะไรจากโค้ดได้บ้าง และอะไรที่มีเพียงสถาปนิกผู้ออกแบบเดิมเท่านั้นที่รู้ ยกตัวอย่างหนึ่งตัวอย่างจาก ADR ของนิสิต
+1. ในห้าข้อที่ตรวจ ไม่พบการเดาที่ถูกติดป้าย *Evidenced*: service definitions และการตั้งค่า HTTP/gRPC ของ `frontend` มีอยู่ในไฟล์ที่อ้าง ส่วนแรงจูงใจในการใช้ชนิดข้อมูลร่วมถูกติดป้าย *Inferred*.
+2. คนใหม่อาจเข้าใจว่าระบบทั้งหมดใช้ gRPC ทั้งที่ `frontend` รับ HTTP และหลักฐานที่ให้ดูยังไม่ครอบคลุม implementation ทุก service (`src/frontend/main.go`, `http.ListenAndServe`).
+3. โค้ดช่วยกู้คืน interface, protocol ที่เห็น และลำดับการเรียกได้ เช่น `grpc.NewClient` กับ `PlaceOrder`. แต่เหตุผลที่ผู้สร้างเลือก `demo.proto` ไฟล์เดียวไม่ปรากฏในโค้ด ต้องถามผู้ตัดสินใจเดิมหรือหา design record.

@@ -38,15 +38,15 @@ evidence: system/online-boutique/protos/demo.proto, system/online-boutique/kuber
 
 | ผู้เรียก → ผู้ถูกเรียก | หลักฐานที่ AI อ้าง | ยืนยันแล้วหรือไม่ ✅ / ❌ / ❓ | สิ่งที่นิสิตพบ |
 |---|---|---|---|
-| | | | |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| checkoutservice → productcatalogservice | `checkoutservice.yaml` (`PRODUCT_CATALOG_SERVICE_ADDR`) | ✅ | `src/checkoutservice/main.go` (`prepOrderItems`, `GetProduct`) ใช้ข้อมูลสินค้าเพื่อคิดราคา |
+| checkoutservice → shippingservice | `checkoutservice.yaml` (`SHIPPING_SERVICE_ADDR`) | ✅ | `src/checkoutservice/main.go` (`quoteShipping`, `shipOrder`) ใช้ทั้งขอราคาและสั่งส่ง |
+| checkoutservice → paymentservice | `checkoutservice.yaml` (`PAYMENT_SERVICE_ADDR`) | ✅ | `src/checkoutservice/main.go` (`chargeCard`, `Charge`) เรียกเก็บเงินก่อนส่งสินค้า |
+| checkoutservice → emailservice | `checkoutservice.yaml` (`EMAIL_SERVICE_ADDR`) | ✅ | `src/checkoutservice/main.go` (`sendOrderConfirmation`) เรียกหลัง shipping และหากผิดพลาดเพียง log warning |
+| checkoutservice → cartservice | `checkoutservice.yaml` (`CART_SERVICE_ADDR`) | ✅ | `src/checkoutservice/main.go` (`GetCart`, `EmptyCart`) อ่านและล้างตะกร้า |
 
-- **สิ่งที่ผิดหรือขาดหายไป** ใน Run B (dependency ที่ไม่มีจริง, dependency ที่ขาดไป, container ที่น่าสงสัย): …
+- **สิ่งที่ผิดหรือขาดหายไป** ใน Run B: แผนภาพจัด `shoppingassistantservice` เป็น `System_Ext` ทั้งที่ไฟล์ที่ให้ดูไม่พิสูจน์ว่าอยู่ภายนอก; `loadgenerator` ปรากฏในแผนภาพแม้ถูกคอมเมนต์ใน `kustomization.yaml`; คำอธิบาย `checkoutservice → cartservice` ขาดการ `EmptyCart` (ดู `outputs/1B-verification.md`).
 
 ## สะท้อนคิด (ข้อละ 2–3 ประโยค)
 
-1. เปรียบเทียบ A กับ B: agent **ไม่สามารถ**รู้อะไรได้จากไฟล์ `.proto` เพียงไฟล์เดียว และเพราะเหตุใด
-2. ข้อผิดพลาด**ข้อใดข้อหนึ่ง**ที่จะทำให้สมาชิกใหม่ของทีมเข้าใจผิดมากที่สุด หากเผยแพร่แผนภาพนี้โดยไม่ตรวจสอบ
+1. Run A เห็นชื่อ service และรูปแบบ request/response แต่ไม่รู้ว่า service ใดเรียกอีก service, มี Redis หรือ deploy อย่างไร เพราะ `.proto` บอกสัญญา API เท่านั้น. Run B จึงเติมความสัมพันธ์จาก `*_SERVICE_ADDR` ใน manifests ได้ แต่ความสัมพันธ์ที่ config ระบุยังต้องตรวจโค้ดอีกชั้นหนึ่ง.
+2. การวาด `shoppingassistantservice` เป็นระบบภายนอกแน่นอนน่าจะทำให้คนใหม่เข้าใจ ownership และขอบเขตการ deploy ผิด. `frontend.yaml` มีเพียง address ส่วน `kustomization.yaml` comment component นี้ไว้ จึงควรทำเครื่องหมายว่าไม่ทราบสถานะและขอบเขต แทนการฟันธง.

@@ -35,10 +35,10 @@ language: Thai
 
 | เกณฑ์ | Run a | Run b |
 |---|---|---|
-| ใช้ตัวเลขจาก scenario หรือไม่ (latency, ช่วงพีก, ข้อจำกัดของ MailFast) | | |
-| ทางเลือกที่พิจารณา (ระบุ) | | |
-| จัดการแต้มสะสมแบบ "ครั้งเดียวเท่านั้น" และ rate limit ของ MailFast หรือไม่ อย่างไร | | |
-| มีสิ่งที่แต่งขึ้นเองหรือไม่ (ตัวเลข เครื่องมือ หรือข้อเท็จจริงที่ไม่มีใน scenario) | | |
+| ใช้ตัวเลขจาก scenario หรือไม่ (latency, ช่วงพีก, ข้อจำกัดของ MailFast) | ไม่มี เพราะ run a ไม่ได้ context เพิ่ม | มี 500 ms, 300 ms, 200 orders/s, MailFast 1.5/8 s, 0.5% และ 50 emails/s (`outputs/2a-adr.md`; `outputs/2b-adr.md`) |
+| ทางเลือกที่พิจารณา (ระบุ) | synchronous calls, message broker, job queue/workflow | synchronous gRPC, RabbitMQ event, database polling workers |
+| จัดการแต้มสะสมแบบ "ครั้งเดียวเท่านั้น" และ rate limit ของ MailFast หรือไม่ อย่างไร | พูดถึง idempotency แต่ไม่ออกแบบ transaction; ไม่รู้ rate limit | เสนอ `orderID` สำหรับ deduplication และ throttle ที่ 50 emails/s แต่ยังไม่แก้ช่องว่าง capacity ระหว่าง 200 กับ 50 และยังไม่กำหนดที่เก็บแต้มแบบ atomic |
+| มีสิ่งที่แต่งขึ้นเองหรือไม่ (ตัวเลข เครื่องมือ หรือข้อเท็จจริงที่ไม่มีใน scenario) | ไม่พบตัวเลขที่แต่งขึ้น; broker และ workflow เป็นทางเลือกเสนอ | RabbitMQ เป็นข้อเสนอที่สอดคล้องกับทักษะทีม ไม่ใช่ระบบเดิม; ร่างระบุผู้ตัดสินใจเองโดยไม่มีหลักฐานว่าได้รับมอบหมาย |
 
 ## รับผิดชอบ ADR ฉบับสุดท้ายของตัวเอง
 
@@ -51,6 +51,6 @@ language: Thai
 
 | # | สิ่งที่เปลี่ยนจากร่างของ AI | เหตุผล |
 |---|---|---|
-| 1 | | |
-| 2 | | |
-| 3 | | |
+| 1 | เพิ่มการคำนวณ backlog ที่ช่วงพีก: 200−50 = 150 emails/s | คิวไม่ได้เพิ่ม quota ของ MailFast; ต้องตกลงเวลารออีเมลหรือเพิ่ม quota (`docs/scenario.md`) |
+| 2 | กำหนด durable order/outbox เป็นเงื่อนไขก่อนยอมรับ order | โค้ดปัจจุบันสร้าง `OrderResult` แล้วตอบโดยไม่มี order write ที่ทนทาน จึงเสี่ยง event หาย (`src/checkoutservice/main.go`, `PlaceOrder`) |
+| 3 | กำหนด ledger ที่บันทึก `orderID` และแต้มใน transaction เดียว พร้อมทดสอบ crash window | `orderID` อย่างเดียวไม่ป้องกันการมอบแต้มซ้ำหลัง consumer ล้มก่อน ack (`docs/adr/0002-publish-order-placed-events.md`, Decision/Validation) |

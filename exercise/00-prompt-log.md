@@ -2,19 +2,19 @@
 
 # บันทึกการใช้ prompt
 
-**ชื่อ / รหัสนิสิต:**
-**agent ที่ใช้:** เช่น GitHub Copilot (Agent mode), Gemini Code Assist, Gemini CLI, Claude Code, Codex, Cursor, Cline: …
-**โมเดล:** …
-**แพ็กเกจที่ใช้:** เช่น Copilot Student, Copilot Free, Gemini รุ่นฟรี: …
+**ชื่อ / รหัสนิสิต:** ธันยพร รัตนเจริญธรรม 6630138721
+**agent ที่ใช้:** GitHub Copilot , Codex
+**โมเดล:** ไม่ทราบ, GPT-6
+**แพ็กเกจที่ใช้:** Codex , Copilot free
 
 บันทึกทุกคำขอที่ส่งให้ agent ช่อง "ไฟล์ที่ agent อ่าน" คือไฟล์ที่ agent รายงาน หรือที่นิสิตเห็นว่า agent เปิด
 
 | # | งาน / run | agent + โมเดล | ข้อความที่ส่ง (ย่อ) | ไฟล์ที่ agent อ่าน | อยู่ในขอบเขตหลักฐานที่อนุญาตหรือไม่ | มีประโยชน์ (1–5) | หมายเหตุ |
 |---|---|---|---|---|---|---|---|
-| 1 | 1-A | | `prompts/1-…` run A | | | | |
-| 2 | 1-B | | `prompts/1-…` run B | | | | |
-| 3 | 2-a | | `prompts/2-…` run a | | | | |
-| 4 | 2-b | | `prompts/2-…` run b | | | | |
-| 5 | 3 | | `prompts/3-…` | | | | |
-| 6 | | | | | | | |
-| 7 | | | | | | | |
+| 1 | 1-A | GitHub Copilot; โมเดล: ไม่ทราบ | `Follow prompts/1-recover-architecture.md`<br>`run: A`<br>`evidence: system/online-boutique/protos/demo.proto` | `prompts/1-recover-architecture.md`<br>`system/online-boutique/protos/demo.proto` (ตาม `outputs/1A-architecture.md`, Files read) | ใช่ | 5 | ผลอยู่ที่ `exercise/outputs/1A-architecture.md` |
+| 2 | 1-B | GitHub Copilot; โมเดล: ไม่ทราบ | `Follow prompts/1-recover-architecture.md`<br>`run: B`<br>`evidence: system/online-boutique/protos/demo.proto, system/online-boutique/kubernetes-manifests/` | `prompts/1-recover-architecture.md`<br>`system/online-boutique/protos/demo.proto`<br>`system/online-boutique/kubernetes-manifests/README.md`<br>`system/online-boutique/kubernetes-manifests/kustomization.yaml`<br>`system/online-boutique/kubernetes-manifests/adservice.yaml`<br>`system/online-boutique/kubernetes-manifests/cartservice.yaml`<br>`system/online-boutique/kubernetes-manifests/checkoutservice.yaml`<br>`system/online-boutique/kubernetes-manifests/currencyservice.yaml`<br>`system/online-boutique/kubernetes-manifests/emailservice.yaml`<br>`system/online-boutique/kubernetes-manifests/frontend.yaml`<br>`system/online-boutique/kubernetes-manifests/loadgenerator.yaml`<br>`system/online-boutique/kubernetes-manifests/paymentservice.yaml`<br>`system/online-boutique/kubernetes-manifests/productcatalogservice.yaml`<br>`system/online-boutique/kubernetes-manifests/recommendationservice.yaml`<br>`system/online-boutique/kubernetes-manifests/shippingservice.yaml` | ใช่ | 5 | Mermaid validator ใช้งานไม่ได้เพราะต้องลงชื่อเข้าใช้; วางผลลัพธ์ไว้ที่ `exercise/outputs/1B-architecture.md` |
+| 3 | 2-a | GitHub Copilot; โมเดล: ไม่ทราบ | `Follow prompts/2-write-adr.md`<br>`run: a`<br>`context: none`<br>`requirement: R-12`<br>`language: Thai` | `prompts/2-write-adr.md`<br>`docs/adr/template.md` | ใช่ | 5 | สร้างร่างไว้ที่ `exercise/outputs/2a-adr.md` |
+| 4 | 2-b | GitHub Copilot; โมเดล: ไม่ทราบ | `Follow prompts/2-write-adr.md`<br>`run: b`<br>`context: docs/scenario.md, docs/adr/0001-use-redis-for-cart-storage.md, system/online-boutique/src/checkoutservice/main.go`<br>`requirement: R-12`<br>`language: Thai` | `prompts/2-write-adr.md`<br>`docs/adr/0001-use-redis-for-cart-storage.md`<br>`docs/adr/template.md`<br>`system/online-boutique/src/checkoutservice/main.go` | ใช่ | 5 | ร่าง `exercise/outputs/2b-adr.md` อ้างตัวเลขจาก `docs/scenario.md` แต่รายการไฟล์ที่อ่านใน log ไม่ระบุไฟล์นี้; ต้องตรวจประวัติ run |
+| 5 | 3 | Codex sub-agent; GPT-6 | `Follow prompts/3-review-adr.md`<br>`adr: docs/adr/0002-publish-order-placed-events.md`<br>`language: Thai` | `prompts/3-review-adr.md`, `docs/adr/0002-publish-order-placed-events.md`, `docs/scenario.md` | ใช่ | 5 | รันซ้ำหลัง ADR-0002 ถูกแก้; ผลล่าสุดอยู่ที่ `exercise/outputs/3-review.md` |
+| 6 | bonus | Codex sub-agent; GPT-6 | `Follow prompts/bonus-recover-decision.md`<br>`decision: Why do all services communicate synchronously over gRPC, using one shared demo.proto?`<br>`evidence: system/online-boutique/protos/demo.proto, system/online-boutique/src/checkoutservice/main.go, system/online-boutique/src/frontend/main.go`<br>`language: Thai` | `prompts/bonus-recover-decision.md`, `docs/adr/template.md`, `system/online-boutique/protos/demo.proto`, `system/online-boutique/src/checkoutservice/main.go`, `system/online-boutique/src/frontend/main.go` | ใช่ | 5 | เขียนใหม่ที่ `exercise/outputs/bonus-recovered-adr.md` |
+| 7 | การเตรียมร่าง ADR | Codex; GPT-6 | เตรียมร่าง ADR เพื่อให้ตรวจทาน | `docs/scenario.md`, `docs/adr/template.md`, `docs/adr/0001-use-redis-for-cart-storage.md`, `system/online-boutique/src/checkoutservice/main.go`, `exercise/outputs/2b-adr.md` และ worksheet ที่เกี่ยวข้อง | ใช่ | 5 | `docs/adr/0002-publish-order-placed-events.md` |
